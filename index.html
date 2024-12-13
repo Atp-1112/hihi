@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงเวลา</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #1d1d1d, #2a2a72);
+            color: #fff;
+        }
+
+        .container {
+            width: 300px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        .time {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .button:last-child {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 80%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup .time {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ff6600;
+        }
+
+        .popup .button {
+            width: auto;
+            padding: 10px 20px;
+            margin: 0;
+            background: linear-gradient(135deg, #28a745, #218838);
+        }
+
+        .popup .button:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="time" id="current-time"></div>
+        <label for="employee-id">กรอกรหัสพนักงาน</label>
+        <input type="text" id="employee-id" placeholder="รหัสพนักงาน">
+        <button class="button" onclick="logTime()">ลงเวลา</button>
+        <button class="button">ย้อนกลับ</button>
+    </div>
+
+    <table id="log-table">
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>รหัสพนักงาน</th>
+                <th>เวลา</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="popup" id="popup">
+        <div class="time" id="popup-time"></div>
+        <p>ยืนยันการลงเวลา</p>
+        <p id="popup-employee-id"></p>
+        <button class="button" onclick="closePopup()">ปิด</button>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const formattedTime = now.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = formattedTime;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        let logIndex = 1;
+
+        function logTime() {
+            const employeeId = document.getElementById('employee-id').value;
+            if (!employeeId) {
+                alert('กรุณากรอกรหัสพนักงาน');
+                return;
+            }
+
+            const now = new Date();
+            const formattedTime = now.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const tableBody = document.querySelector('#log-table tbody');
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+                <td>${logIndex}</td>
+                <td>${employeeId}</td>
+                <td>${formattedTime}</td>
+            `;
+
+            tableBody.appendChild(newRow);
+            logIndex++;
+
+            document.getElementById('employee-id').value = '';
+
+            showPopup(employeeId, formattedTime);
+        }
+
+        function showPopup(employeeId, time) {
+            document.getElementById('popup-employee-id').textContent = employeeId;
+            document.getElementById('popup-time').textContent = time;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
